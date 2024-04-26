@@ -1,6 +1,10 @@
 #include <csignal>
 #include <syslog.h>
+#include <fcntl.h>
 #include <sys/inotify.h>
+#include <sys/stat.h>
+#include <signal.h>
+#include <errno.h>
 #include <sys/resource.h>
 #include <unistd.h>
 
@@ -8,6 +12,7 @@
 
 
 const uint32_t watch_mode = IN_CREATE | IN_DELETE;
+const std::string WATCHER_PID_PATH = "/tmp/watcher_pid";
 
 DaemonWatcher* DaemonWatcher::instance = nullptr;
 
@@ -42,7 +47,7 @@ void DaemonWatcher::prepareSystem(){
         exit(0);
     }
 
-    setsid();
+    auto pid = setsid();
 
     int fd;
     struct rlimit file_limit;
@@ -54,6 +59,18 @@ void DaemonWatcher::prepareSystem(){
     chdir("/");
 
     openlog("DaemonWatcher", LOG_PID | LOG_CONS, LOG_DAEMON);
+
+    pid_t watcher_pid;
+    if(
+        (std::ifstream(WATCHER_PID_PATH) >> watcher_pid) &&
+        !(kill(watcher_pid, 0) == -1 && errno == ESRCH)
+    ){
+        syslog(LOG_INFO, "Daemon already started");
+        exit(-1);
+    }
+
+    std::ofstream(WATCHER_PID_PATH) << pid;
+
     syslog(LOG_INFO, "Starting daemon...");
 }
 
@@ -105,9 +122,13 @@ int DaemonWatcher::startWatching(){
         process_inotify_events(InotifyFd, log_file);
     }
 
+    syslog(LOG_INFO, "End of work");
+
     close(InotifyFd);
     log_file.close();
+    return 0;
 }
+
 
 int main(int argc, char **argv){
     DaemonWatcher* daemon = DaemonWatcher::getInstance();
