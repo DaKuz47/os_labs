@@ -36,6 +36,12 @@ void DaemonWatcher::configure(const std::string& config_path){
 }
 
 
+void termHandler(int signum){
+    syslog(LOG_INFO, "Terminating...");
+    exit(0);
+}
+
+
 void DaemonWatcher::prepareSystem(){
     if (getppid() != 1){
         std::signal(SIGTTOU, SIG_IGN);
@@ -46,6 +52,7 @@ void DaemonWatcher::prepareSystem(){
     if (fork() != 0) {
         exit(0);
     }
+
 
     auto pid = setsid();
 
@@ -70,6 +77,8 @@ void DaemonWatcher::prepareSystem(){
     }
 
     std::ofstream(WATCHER_PID_PATH) << pid;
+    
+    signal(SIGTERM, termHandler);
 
     syslog(LOG_INFO, "Starting daemon...");
 }
