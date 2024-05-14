@@ -27,7 +27,6 @@ bool Set::remove(int item){
             prev = current;
             current = current->next;
         }
-
         pthread_mutex_lock(&prev->mutex);
         pthread_mutex_lock(&current->mutex);
 
@@ -63,7 +62,6 @@ bool Set::add(int item){
             prev = current;
             current = current->next;
         }
-
         pthread_mutex_lock(&prev->mutex);
         pthread_mutex_lock(&current->mutex);
 

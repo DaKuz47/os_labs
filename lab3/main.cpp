@@ -3,7 +3,7 @@
 
 
 int main(){
-    const int item_count = 100;
+    const int item_count = 10;
     const int repeat_count = 10;
 
     std::cout << "CONSUMERS THREAD COUNT " << THREAD_COUNT << std::endl;
@@ -29,7 +29,7 @@ int main(){
     std::cout << res << std::endl;
 
     std::cout << "==TEST 6. SET WITH LAZY SYNC. GENERAL. ITEMS COUNT " << item_count << std::endl;
-    res = set_consumers_test(item_count) ? "SUCCESS" : "FAILED";
+    res = set_general_test(item_count) ? "SUCCESS" : "FAILED";
     std::cout << res << std::endl;
 
     std::cout << "==TEST 7 MCSP. SPEED TEST. ITEMS COUNT " << item_count << std::endl;

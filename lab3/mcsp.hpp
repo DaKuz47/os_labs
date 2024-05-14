@@ -1,5 +1,6 @@
 #pragma once
 
+#include <queue>
 #include <pthread.h>
 #include <vector>
 
@@ -16,22 +17,8 @@ class MCSP{
         void print_values();
         std::vector<int> get_items();
     private:
-        class Node{
-            public:
-                Node(int item){
-                    this->item = item;
-                    next = nullptr;
-                }
-                ~Node() = default;
+        std::queue<int> queue;
 
-                int item;
-                Node* next;
-        };
-
-        Node* head;
-        Node* tail;
-
-        pthread_mutex_t head_mutex;
-        pthread_mutex_t tail_mutex;
+        pthread_mutex_t queue_mutex;
         pthread_cond_t ready_to_read;
 };
